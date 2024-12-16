@@ -18,8 +18,6 @@ import { Page } from './components/View/Page';
 const api = new AppApi(API_URL, CDN_URL);
 const events = new EventEmitter();
 
-console.log(api);
-
 const cardData = new CardData(events);
 const cartData = new CartData(events);
 const orderData = new OrderData(events);
@@ -200,15 +198,15 @@ events.on(
 	}
 );
 
-events.on('contact:submit', () => {
+events.on('contacts:submit', () => {
 	api
         .postOrder(orderData.getOrder())
 		.then((result) => {
+			console.log(orderData.getOrder());
 			cartData.clearCart();
 			page.counter = cartData.getCartSize();
 			events.emit('cart:changed');
 			orderData.clearOrder();
-
 			const success = new EndModal(cloneTemplate(endModalTemplate), {
 				onClick: () => {
 					modal.close();

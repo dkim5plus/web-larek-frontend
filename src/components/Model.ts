@@ -90,7 +90,6 @@ export class CartData implements ICartData {
 		this._cart = this._cart.filter((item) => item.id !== id);
         this.events.emit('cart:changed');
 	}
-
 }
 
 interface IOrderData {
@@ -136,11 +135,11 @@ export class OrderData implements IOrderData {
 		if (!this._order.payment) {
 			error.payment = 'Укажите способ оплаты';
 		}
+        if (!this._order.address) {
+			error.address = 'Укажите адрес доставки';
+		}
 		if (!this._order.email) {
 			error.email = 'Укажите ваш e-mail';
-		}
-		if (!this._order.address) {
-			error.address = 'Укажите адрес доставки';
 		}
 		if (!this._order.phone) {
 			error.phone = 'Укажите номер телефона';
@@ -152,8 +151,6 @@ export class OrderData implements IOrderData {
 
     setOrder(field: keyof IOrderForm, value: string) {
 		this._order[field] = value;
-        if (this.validateOrder()) {
-			this.events.emit('order:ready', this._order);
-		}
+        this.validateOrder();
 	}
 }
