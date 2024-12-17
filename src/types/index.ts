@@ -24,11 +24,6 @@ export interface IOrderForm {
 	phone: string;
 }
 
-export interface ICart {
-    items: IProduct[];
-    total: number;
-}
-
 
 export type TCart = Pick<IProduct, 'id' | 'title' | 'price'>;
 export type TCard = Pick<IProduct, 'description'| 'image' | 'category' | 'title' |'price'>;

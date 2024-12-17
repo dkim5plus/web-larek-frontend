@@ -36,6 +36,8 @@ const cart = new Cart(cloneTemplate(cartTemplate), events);
 const formDelivery = new FormDelivery(cloneTemplate(deliveryTemplate), events);
 const formContact = new FormContact(cloneTemplate(contactTemplate), events);
 
+
+
 api
 	.getCards()
 	.then((items) => {
@@ -130,14 +132,14 @@ events.on('cart:changed', () => {
 
 	cart.render({
 		selectedList: products,
-		total: cartData.getTotal(),
+		total: cartData.total,
 	});
 });
 
 events.on('cart:open', () => {
 	modal.render({
 		content: cart.render({
-			total: cartData.getTotal(),
+			total: cartData.total,
 		}),
 	});
 });
@@ -200,13 +202,18 @@ events.on(
 
 events.on('contacts:submit', () => {
 	api
-        .postOrder(orderData.getOrder())
+		.postOrder({
+			payment: orderData.order.payment,
+			address: orderData.order.address,
+			phone: orderData.order.phone,
+			email: orderData.order.email,
+			items: cartData.cart.map(item => {
+				if (!(item.price === null)) {
+					return item.id;
+				}
+			}).filter(Boolean),
+			total: cartData.total})
 		.then((result) => {
-			console.log(orderData.getOrder());
-			cartData.clearCart();
-			page.counter = cartData.getCartSize();
-			events.emit('cart:changed');
-			orderData.clearOrder();
 			const success = new EndModal(cloneTemplate(endModalTemplate), {
 				onClick: () => {
 					modal.close();
@@ -215,9 +222,15 @@ events.on('contacts:submit', () => {
 
 			modal.render({
 				content: success.render({
-					total: cartData.getTotal(),
+					total: cartData.total,
 				}),
 			});
+
+			cartData.clearCart();
+			page.counter = cartData.getCartSize();
+			events.emit('cart:changed');
+			orderData.clearOrder();
 		})
 		.catch((err) => console.log(err));
 });
+

@@ -57,7 +57,7 @@ export interface IProduct {
 
 Инфа о заказе
 ```
-interface IOrder {
+interface IOrderInfo {
 	payment: string;
 	email: string;
 	phone: string;
@@ -67,38 +67,15 @@ interface IOrder {
 }
 ```
 
-Корзина
+Формы заказа
 ```
-interface ICart {
-  items: IProduct[];
-  total: number;
-}
-```
-
-Способ оплаты и адрес
-```
-interface IDelivery {
+export interface IOrderForm {
 	payment: string;
-  address: string;
-}
-```
-
-Контактные данные
-```
-interface IContact {
+	address: string;
 	email: string;
 	phone: string;
 }
 ```
-
-Главная страница
-```
-interface IPage {
-  items: IProduct[];
-  counter: number;
-}
-```
-
 ## Архитектура приложения
 
 Код приложения написан в парадигме MVP(Model, View, Presenter)
@@ -145,27 +122,58 @@ constructor(baseUrl: string, options: RequestInit = {})
 ## Слой данных
 ### Класс CardData
 Отвечает за получение массива товаров с сервера и его хранение, за логику открытия подробной информации о товаре.
+
+```
+interface ICardData {
+    preview: IProduct | null;
+    setCatalog(data: IProduct[]): void;
+    getCatalog(): IProduct[];
+    setCardPreview(item: IProduct): void;
+    getProduct(cardId: string): void;
+}
+```
+
 Методы:
-- set и get, отвечающие за массив карточек 
+- set и get, отвечающие за массив карточек
 - setCardPreview - выбор товара для отображения в модальном окне
+- getProduct - поиск товара по id
 
 ### Класс CartData
 Хранит данные о товарах, добавленных в корзину, и логику работы с этими данными.
+
+```
+interface ICartData {
+    cart: TCart[];
+    clearCart(): void;
+    getCartSize(): void;
+    addCart(product: IProduct): void;
+    removeCart(id: string): void;
+}
+```
+
 Методы:
 - addCart - добавляет товар в корзину 
-- removeCart - удаляет товар из корзины  
-- getTotal - получает стоимость всей корзины 
+- removeCart - удаляет товар из корзины   
 - clearCart - очистка корзины
 - getCartSize - возвращает количество товара в корзине
-- getCartId- получение массива из id товаров в корзине
+- set и get для работы с данными.
 
 
 ### Класс OrderData
 Отвечает за хранение и логику работы с данными пользователя для оформления заказа.
+
+```
+interface IOrderData {
+    clearOrder(): void;
+    validateOrder(): void;
+    setOrder(field: keyof IOrderForm, value: string): void;
+}
+```
+
 Методы:
-- getOrder - получение данных для заказа
+- set и get для работы с данными заказа
 - clearOrder - очистка текущего заказа
-- setOrderField - записывает значение в поле заказа 
+- setOrder - записывает значение в поле заказа 
 - validateOrder - валидация полей заказа и установка значений ошибок, если они есть 
 
 ### События изменения данных:
@@ -197,6 +205,7 @@ constructor(baseUrl: string, options: RequestInit = {})
 - open - открывает модальное окно 
 - close - закрывает модальное окно 
 - set content - меняет содержимое модального окна
+- render - отрисовывает модальное окно
 
 ### Класс Cart
 Отвечает за работу с корзиной.
@@ -231,16 +240,20 @@ constructor(baseUrl: string, options: RequestInit = {})
 
 
 ### События, возникающие при взаимодействии пользователя с интерфейсом:
-- card:open - открытие модалки с карточкой товара;
-- card:close - закрытие модалки с карточкой товара;
-- cart:open - открытие модалки корзины;
-- cart:close - закрытие модалки корзины;
-- adress:input - изменение данных в форме с вводом адреса;
-- email:input - изменение данных в форме с вводом почты;
-- phone:input - изменение данных в форме с вводом телефона;
-- delivery:submit - отправка формы с адресом;
-- contact:submit - отправка формы с контактами пользователя;
-- end:close - закрытие модалки уведомления об успешных покупках.
+
+- modal:open - открытие модалки
+- modal:close - закрытие модалки
+- preview:open - открытие модалки карточки товара
+- cart:delete - удалить товар из корзины
+- cart:add - добавить товар в корзину
+- cart:open - открыть модалку корзины
+- order:open - открытие модалки заказа
+- order:submit - открытие 2ой модалки заказа
+- errors:changed - изменение ошибок в заказе
+- payment:choosed - изменение способа оплаты
+- order:change - изменение данных в заказе
+- contacts:change - изменение данных в заказе
+- contacts:submit - отправка данных заказа
 
 ## Взаимодействие компонентов
 

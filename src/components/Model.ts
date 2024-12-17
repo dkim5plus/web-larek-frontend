@@ -1,5 +1,5 @@
 import { IEvents } from '../components/base/events'
-import { IProduct, IOrderInfo, TFormErrors, IOrderForm } from  '../types/index';
+import { IProduct, IOrderInfo, TFormErrors, IOrderForm, TCart } from  '../types/index';
 
 interface ICardData {
     preview: IProduct | null;
@@ -41,28 +41,27 @@ export class CardData implements ICardData {
 }
 
 interface ICartData {
-    cart: IProduct[];
+    cart: TCart[];
     clearCart(): void;
     getCartSize(): void;
-    getTotal(): void;
     addCart(product: IProduct): void;
     removeCart(id: string): void;
 }
 
 export class CartData implements ICartData {
-	protected _cart: IProduct[] = [];
+	protected _cart: TCart[];
 
     constructor (protected events: IEvents) {
-        this.events = events
+        this._cart = []
     }
     
-    set cart(data: IProduct[]) {
+    set cart(data: TCart[]) {
         this._cart = data;
       }
     
     get cart() {
         return this._cart;
-      }
+    }
 	
     clearCart() {
         this._cart = [];
@@ -73,13 +72,10 @@ export class CartData implements ICartData {
         return this._cart.length;
     }
 
-    getTotal() {
-        let summ = 0;
-        this._cart.forEach(item => {
-          summ = summ + item.price;
-        });
-        return summ;
+    get total() {
+        return this._cart.reduce((acc, item) => acc + (item.price || 0), 0);
     }
+    
 
     addCart(product: IProduct): void {
 		this._cart.push(product);
@@ -93,11 +89,9 @@ export class CartData implements ICartData {
 }
 
 interface IOrderData {
-    getOrder(): IOrderInfo;
     clearOrder(): void;
     validateOrder(): void;
     setOrder(field: keyof IOrderForm, value: string): void;
-
 }
 
 export class OrderData implements IOrderData {
@@ -115,7 +109,12 @@ export class OrderData implements IOrderData {
 		this.events = events;
 	}
 
-    getOrder(): IOrderInfo {
+    set order(order: IOrderInfo) {
+		this._order = order;
+	}
+
+
+	get order() {
 		return this._order;
 	}
 
@@ -153,4 +152,7 @@ export class OrderData implements IOrderData {
 		this._order[field] = value;
         this.validateOrder();
 	}
+
+
+
 }
